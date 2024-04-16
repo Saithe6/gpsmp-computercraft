@@ -6,6 +6,7 @@ tor.blacklist = {
     "advancedperipherals",
     "cccbridge",
     "vampirism",
+    "werewolves",
     "fantasyfurniture",
     "farmersdelight",
     "minecolonies",
@@ -36,7 +37,11 @@ tor.blacklist = {
     "create:scoria",
     "create:scorchia",
     "create:veridium",
-    "mna:vinteum_ore"
+    "mna:vinteum_ore",
+    "vampirism:cursed_grass",
+    "vampirism:cursed_earth",
+    "vampirism:cursed_earth_path",
+    "vampirism:dark_stone"
   },
   types = {
     "chest",
