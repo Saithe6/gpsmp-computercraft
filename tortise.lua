@@ -6,6 +6,7 @@ tor.blacklist = {
     "advancedperipherals",
     "cccbridge",
     "vampirism",
+    "werewolves",
     "fantasyfurniture",
     "farmersdelight",
     "minecolonies",
@@ -36,7 +37,9 @@ tor.blacklist = {
     "create:scoria",
     "create:scorchia",
     "create:veridium",
-    "mna:vinteum_ore"
+    "mna:vinteum_ore",
+    "vampirism:cursed_earth",
+    "vampirism:dark_stone"
   },
   types = {
     "chest",
@@ -175,12 +178,9 @@ function tor.turn(dir)
 end
 
 function tor.track(x,y,z)
-  x = -x
-  y = -y
-  z = -z
-  tor.data.home.x = tor.data.home.x + x
-  tor.data.home.y = tor.data.home.y + y
-  tor.data.home.z = tor.data.home.z + z
+  tor.data.home.x = tor.data.home.x - x
+  tor.data.home.y = tor.data.home.y - y
+  tor.data.home.z = tor.data.home.z - z
 end
 
 function tor.toRelative(absVec)
@@ -222,7 +222,7 @@ function tor.vecMove(v,mine)
   if v.l > 0 then
     tor.turn("left")
     tor.move(v.l,"forward",mine)
-  elseif v.r < 0 then
+  elseif v.l < 0 then
     tor.turn("right")
     tor.move(math.abs(v.l),"forward",mine)
   end
