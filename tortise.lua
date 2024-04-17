@@ -179,12 +179,9 @@ function tor.turn(dir)
 end
 
 function tor.track(x,y,z)
-  x = -x
-  y = -y
-  z = -z
-  tor.data.home.x = tor.data.home.x + x
-  tor.data.home.y = tor.data.home.y + y
-  tor.data.home.z = tor.data.home.z + z
+  tor.data.home.x = tor.data.home.x - x
+  tor.data.home.y = tor.data.home.y - y
+  tor.data.home.z = tor.data.home.z - z
 end
 
 function tor.toRelative(absVec)
