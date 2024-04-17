@@ -6,7 +6,6 @@ tor.blacklist = {
     "advancedperipherals",
     "cccbridge",
     "vampirism",
-    "werewolves",
     "fantasyfurniture",
     "farmersdelight",
     "minecolonies",
@@ -37,16 +36,13 @@ tor.blacklist = {
     "create:scoria",
     "create:scorchia",
     "create:veridium",
-    "mna:vinteum_ore",
-    "vampirism:cursed_grass",
-    "vampirism:cursed_earth",
-    "vampirism:cursed_earth_path",
-    "vampirism:dark_stone"
+    "mna:vinteum_ore"
   },
   types = {
     "chest",
     "barrel",
-    "table"
+    "table",
+    "bedrock"
   }
 }
 tor.data = {
@@ -179,9 +175,12 @@ function tor.turn(dir)
 end
 
 function tor.track(x,y,z)
-  tor.data.home.x = tor.data.home.x - x
-  tor.data.home.y = tor.data.home.y - y
-  tor.data.home.z = tor.data.home.z - z
+  x = -x
+  y = -y
+  z = -z
+  tor.data.home.x = tor.data.home.x + x
+  tor.data.home.y = tor.data.home.y + y
+  tor.data.home.z = tor.data.home.z + z
 end
 
 function tor.toRelative(absVec)
@@ -189,16 +188,16 @@ function tor.toRelative(absVec)
   local facing = tor.data.facing
   if facing == "north" then
     relVec.f = -absVec.z
-    relVec.r = absVec.x
+    relVec.l = absVec.x
   elseif facing == "east" then
     relVec.f = absVec.x
-    relVec.r = absVec.z
+    relVec.l = absVec.z
   elseif facing == "west" then
     relVec.f = -absVec.x
-    relVec.r = -absVec.z
+    relVec.l = -absVec.z
   else
     relVec.f = absVec.z
-    relVec.r = -absVec.x
+    relVec.l = -absVec.x
   end
   return relVec
 end
@@ -216,16 +215,16 @@ function tor.vecMove(v,mine)
     for i = 1,2 do
       tor.turn("left")
     end
-    v.r = -v.r
+    v.l = -v.l
     tor.move(math.abs(v.f),"forward",mine)
   end
 
-  if v.r > 0 then
-    tor.turn("right")
-    tor.move(v.r,"forward",mine)
-  elseif v.r < 0 then
+  if v.l > 0 then
     tor.turn("left")
-    tor.move(math.abs(v.r),"forward",mine)
+    tor.move(v.l,"forward",mine)
+  elseif v.r < 0 then
+    tor.turn("right")
+    tor.move(math.abs(v.l),"forward",mine)
   end
 end
 
