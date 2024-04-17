@@ -45,7 +45,8 @@ tor.blacklist = {
     "chest",
     "barrel",
     "table",
-    "bedrock"
+    "bedrock",
+    "bed"
   }
 }
 tor.data = {
