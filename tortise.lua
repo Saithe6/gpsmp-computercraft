@@ -6,7 +6,6 @@ tor.blacklist = {
     "advancedperipherals",
     "cccbridge",
     "vampirism",
-    "werewolves",
     "fantasyfurniture",
     "farmersdelight",
     "minecolonies",
@@ -37,16 +36,13 @@ tor.blacklist = {
     "create:scoria",
     "create:scorchia",
     "create:veridium",
-    "mna:vinteum_ore",
-    "vampirism:cursed_earth",
-    "vampirism:dark_stone"
+    "mna:vinteum_ore"
   },
   types = {
     "chest",
     "barrel",
     "table",
-    "bedrock",
-    "bed"
+    "bedrock"
   }
 }
 tor.data = {
@@ -55,7 +51,7 @@ tor.data = {
     y = 0,
     z = 0
   },
-  facing = "north"
+  facing = "south"
 }
 tor.toolSide = "left"
 
@@ -213,9 +209,8 @@ function tor.vecMove(v,mine)
   if v.f > 0 then
     tor.move(v.f,"forward",mine)
   elseif v.f < 0 then
-    for i = 1,2 do
-      tor.turn("left")
-    end
+    tor.turn("left")
+    tor.turn("left")
     v.l = -v.l
     tor.move(math.abs(v.f),"forward",mine)
   end
@@ -229,14 +224,89 @@ function tor.vecMove(v,mine)
   end
 end
 
-function tor.reorient()
-  if tor.data.facing == "east" then
+local function directMove(instruction,mine)
+  local dir = string.sub(instruction,-1,-1)
+  local dist = tonumber(string.sub(instruction,1,-2))
+  local moves = {}
+
+  function moves.f()
+    if dist < 0 then
+      tor.turn("left")
+      tor.turn("left")
+      dist = math.abs(dist)
+    end
+    tor.move(dist,"forward",mine)
+  end
+  
+  function moves.l()
+    if dist < 0 then
+      tor.turn("right")
+    else
+      tor.turn("left")
+    end
+    tor.move(math.abs(dist),"forward",mine)
+  end
+
+  function moves.y()
+    if dist < 0 then
+      dir = "down"
+    else
+      dir = "up"
+    end
+    tor.move(math.abs(dist),dir,mine)
+  end
+
+  function moves.z()
+    if dist < 0 then
+      tor.orient("north")
+      tor.move(math.abs(dist),"forward",mine)
+    else
+      tor.orient("south")
+      tor.move(math.abs(dist),"forward",mine)
+    end
+  end
+
+  function moves.x()
+    if dist < 0 then
+      tor.orient("west")
+      tor.move(math.abs(dist),"forward",mine)
+    else
+      tor.orient("east")
+      tor.move(math.abs(dist),"forward",mine)
+    end
+  end
+  moves[dir]()
+end
+
+function tor.orient(goal)
+  local instructions = {
+    north = {
+      east = "right",
+      west = "left",
+      south = "reverse"
+    },
+    east = {
+      south = "right",
+      north = "left",
+      west = "reverse"
+    },
+    south = {
+      west = "right",
+      east = "left",
+      north = "reverse"
+    },
+    west = {
+      north = "right",
+      south = "left",
+      east = "reverse"
+    }
+  }
+  local operation = instructions[tor.data.facing][goal]
+  if operation == "reverse" then
     tor.turn("left")
-  elseif tor.data.facing == "west" then
-    tor.turn("right")
-  elseif tor.facing == "south" then
     tor.turn("left")
-    tor.turn("left")
+  else
+    tor.turn(operation)
   end
 end
 
