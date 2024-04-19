@@ -101,7 +101,7 @@ end
 
 function tor.checkPath(dir)
   local block,isBlock = tor.detect(dir)
-  if block.name == nil then isBlock = false else print("good") end
+  if block.name == nil then isBlock = false end
   print(isBlock)
   if isBlock ~= false then
     if not tor.checkBlacklist(block.name) then
