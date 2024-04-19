@@ -23,9 +23,7 @@ tor.blacklist = {
     "rats",
     "toms_storage",
     "morevillagers",
-    "mna:vinteum_ore",
-    "vampirism:cursed_earth",
-    "vampirism:dark_stone"
+    "mna"
   },
   overrides = {
     "create:zinc_ore",
@@ -44,8 +42,7 @@ tor.blacklist = {
     "chest",
     "barrel",
     "table",
-    "bedrock",
-    "bed"
+    "bedrock"
   }
 }
 tor.data = {
@@ -227,7 +224,7 @@ function tor.vecMove(v,mine)
   end
 end
 
-local function directMove(instruction,mine)
+function tor.directMove(instruction,mine)
   local dir = string.sub(instruction,-1,-1)
   local dist = tonumber(string.sub(instruction,1,-2))
   local moves = {}
