@@ -23,7 +23,9 @@ tor.blacklist = {
     "rats",
     "toms_storage",
     "morevillagers",
-    "mna"
+    "mna:vinteum_ore",
+    "vampirism:cursed_earth",
+    "vampirism:dark_stone"
   },
   overrides = {
     "create:zinc_ore",
@@ -42,7 +44,8 @@ tor.blacklist = {
     "chest",
     "barrel",
     "table",
-    "bedrock"
+    "bedrock",
+    "bed"
   }
 }
 tor.data = {
