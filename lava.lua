@@ -4,9 +4,12 @@ max = turtle.getFuelLimit()
 print(max)
 turtle.suckUp()
 turtle.refuel()
-for i = current,max,1000 do
+while current < max do
   turtle.placeDown()
-  turtle.refuel()
+  if turtle.refuel() then
+    print(current)
+  end
   sleep(.05)
+  current = turtle.getFuelLevel()
 end
 turtle.dropUp()
