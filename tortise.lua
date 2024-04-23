@@ -15,7 +15,6 @@ tor.blacklist = {
     "structurize",
     "mcwwindows",
     "sophisticatedstorage",
-    "sophisticatedbackpacks",
     "railways",
     "nethersdelight",
     "supplementaries",
@@ -38,7 +37,12 @@ tor.blacklist = {
     "create:scoria",
     "create:scorchia",
     "create:veridium",
-    "mna:vinteum_ore"
+    "mna:vinteum_ore",
+    "sophisticatedstorage:shulker_box",
+    "sophisticatedstorage:copper_shulker_box",
+    "sophisticatedstorage:iron_shulker_box",
+    "sophisticatedstorage:diamond_shulker_box",
+    "sophisticatedstorage:netherite_shulker_box"
   },
   types = {
     "chest",
@@ -239,7 +243,7 @@ function tor.directMove(instruction,mine)
     end
     tor.move(dist,"forward",mine)
   end
-  
+
   function moves.l()
     if dist < 0 then
       tor.turn("right")
@@ -278,6 +282,13 @@ function tor.directMove(instruction,mine)
     end
   end
   moves[dir]()
+end
+
+function tor.shulker()
+  if not turtle.place() then
+    turtle.dig()
+  end
+  return peripheral.wrap("front")
 end
 
 function tor.orient(goal)
