@@ -15,7 +15,6 @@ tor.blacklist = {
     "structurize",
     "mcwwindows",
     "sophisticatedstorage",
-    "railways",
     "nethersdelight",
     "supplementaries",
     "create_enchantment_industry",
