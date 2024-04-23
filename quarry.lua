@@ -22,7 +22,7 @@ end
 
 local function hasShulker()
   local shulker = turtle.getItemDetail(1)
-  if string.find("shulker",shulker.name) ~= nil then return true end
+  if shulker ~= nil and string.find("shulker",shulker.name) ~= nil then return true end
   return false
 end
 
