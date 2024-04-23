@@ -4,7 +4,7 @@ local tArgs = {...}
 --Whether or not the turtle should try to store items in a shulker box placed in its first slot
 local storageBlind = false
 
-local function checkSpace()
+local function checkSpace(storageAware)
   if turtle.getItemSpace(16) ~= 64 and storageAware and not storageBlind then
     tor.turn("left")
     tor.turn("left")
@@ -26,7 +26,7 @@ local function hasShulker()
   return false
 end
 
-local function layer(right,up,udfe)
+local function layer(right,up,udfe,storageAware)
   local dist = tonumber(tArgs[1])
   local strips = tonumber(tArgs[2])
   local turn = -1
@@ -46,7 +46,7 @@ local function layer(right,up,udfe)
       tor.directMove(turn*r*dist.."l",true)
       turn = -turn
     end
-    checkSpace()
+    checkSpace(storageAware)
   end
 end
 
@@ -62,32 +62,34 @@ local function turnHandler(dir,rStart)
   end
 end
 
-local function volume(right,udfe)
+local function volume(right,udfe,storageAware)
   local layers = tonumber(tArgs[3])
   local ud,up
   if udfe == "f" then up = true end
   layer(right,up,udfe)
   if udfe == "d" then ud = "-1y" else ud = "1y" end
-  for i = 1,layers do
-    if udfe == "d" or udfe == "u" then
-      if tonumber(tArgs[2])%2 == 0 then
-        turnHandler("left",right)
-      else
-        if right then tor.turn("left") else tor.turn("right") end
-        right = not right
+  if layers > 0 then
+    for i = 1,layers do
+      if udfe == "d" or udfe == "u" then
+        if tonumber(tArgs[2])%2 == 0 then
+          turnHandler("left",right)
+        else
+          if right then tor.turn("left") else tor.turn("right") end
+          right = not right
+        end
+        tor.directMove(ud,true)
+        layer(right,udfe)
+      elseif udfe == "f" or udfe == "e" then
+        if tonumber(tArgs[2])%2 == 0 then
+          if right then tor.turn("left") else tor.turn("right") end
+          right = not right
+        else
+          turnHandler("left",right)
+        end
+        tor.directMove("1f",true)
+        up = not up
+        layer(right,up,udfe,storageAware)
       end
-      tor.directMove(ud,true)
-      layer(right,udfe)
-    elseif udfe == "f" or udfe == "e" then
-      if tonumber(tArgs[2])%2 == 0 then
-        if right then tor.turn("left") else tor.turn("right") end
-        right = not right
-      else
-        turnHandler("left",right)
-      end
-      tor.directMove("1f",true)
-      up = not up
-      layer(right,up,udfe)
     end
   end
 end
@@ -116,7 +118,7 @@ local function main()
         tor.directMove(initialMoves[tArgs[1]],true)
         table.remove(tArgs,1)
       end
-      volume(right,udfe)
+      volume(right,udfe,storageAware)
     else
       print("error: empty plus argument")
     end
