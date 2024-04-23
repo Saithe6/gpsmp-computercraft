@@ -1,69 +1,93 @@
 local tor = require("libs/tortise")
 local tArgs = {...}
 
+--Whether or not the turtle should try to store items in a shulker box placed in its first slot
+local storageBlind = false
 
-local function volume()
-  local vol
-  local vDir
-  if tArgs[3] ~= nil then
-    vol = tonumber(string.sub(tArgs[3],1,-2))
-    vDir = string.sub(tArgs[3],-1,-1)
-  end
-
-  local layers = tonumber(string.sub(tArgs[2],1,-2))
-  local lDir = string.sub(tArgs[2],-1,-1)
-
-  local dist = tonumber(string.sub(tArgs[1],1,-2))
-  local dir = string.sub(tArgs[1],-1,-1)
-
-  local function layer()
-    if dir == "y" and dist < 0 then
-    elseif dir == "y" then
-    else
-      tor.directMove(tArgs[1],true)
-      local turn = 1
-      if dist >= 0 then
-        turn = -1
-      end
-      dist = math.abs(dist)
-      for i = 1,math.abs(layers) do
-        if lDir == "y" then
-          if layers < 0 then
-            tor.directMove("-1y",true)
-          else
-            tor.directMove("1y",true)
-          end
-          tor.directMove("-"..dist.."f",true)
-        elseif lDir == "f" then
-          tor.directMove(turn.."l",true)
-          tor.directMove(turn*dist.."l",true)
-          turn = -turn
-        end
-      end
+local function checkSpace()
+  if turtle.getItemSpace(16) ~= 64 and storageAware and not storageBlind then
+    tor.turn("left")
+    tor.turn("left")
+    tor.shulker()
+    for i = 2,16 do
+      turtle.select(i)
+      turtle.drop()
     end
+    turtle.select(1)
+    turtle.dig()
+    tor.turn("left")
+    tor.turn("left")
   end
+end
 
-  if vDir == nil then
-    layer()
-  else
-    layer()
-    for i = 1,math.abs(vol) do
-      if vDir == "f" then
-        layers = -layers
-        if math.abs(layers)%2 == 0 then
-          tor.directMove("-1l",true)
-        else
-          tor.directMove("1l",true)
-        end
-      elseif vDir == "y" and vol < 0 then
-        tor.directMove("0l")
-        tor.directMove("0l")
-        tor.directMove("-1y",true)
-      elseif vDir == "y" then
-        layers = -layers
+local function hasShulker()
+  local shulker = turtle.getItemDetail(1)
+  if string.find("shulker",shulker.name) ~= nil then return true end
+  return false
+end
+
+local function layer(right,up,udfe)
+  local dist = tonumber(tArgs[1])
+  local strips = tonumber(tArgs[2])
+  local turn = -1
+  local r = 1
+  if right then dist,turn,r = -dist,-turn,-1 end
+  tor.directMove(dist.."l",true)
+  for i = 1,strips do
+    if udfe == "f" or udfe == "e" then
+      if up then
         tor.directMove("1y",true)
+      else
+        tor.directMove("-1y",true)
       end
-      layer()
+      tor.directMove("-"..math.abs(dist).."f",true)
+    else
+      tor.directMove(turn.."l",true)
+      tor.directMove(turn*r*dist.."l",true)
+      turn = -turn
+    end
+    checkSpace()
+  end
+end
+
+local function turnHandler(dir,rStart)
+  local opposites = {
+    left = "right",
+    right = "left"
+  }
+  if rStart then
+    tor.turn(opposites[dir])
+  else
+    tor.turn(dir)
+  end
+end
+
+local function volume(right,udfe)
+  local layers = tonumber(tArgs[3])
+  local ud,up
+  if udfe == "f" then up = true end
+  layer(right,up,udfe)
+  if udfe == "d" then ud = "-1y" else ud = "1y" end
+  for i = 1,layers do
+    if udfe == "d" or udfe == "u" then
+      if tonumber(tArgs[2])%2 == 0 then
+        turnHandler("left",right)
+      else
+        if right then tor.turn("left") else tor.turn("right") end
+        right = not right
+      end
+      tor.directMove(ud,true)
+      layer(right,udfe)
+    elseif udfe == "f" or udfe == "e" then
+      if tonumber(tArgs[2])%2 == 0 then
+        if right then tor.turn("left") else tor.turn("right") end
+        right = not right
+      else
+        turnHandler("left",right)
+      end
+      tor.directMove("1f",true)
+      up = not up
+      layer(right,up,udfe)
     end
   end
 end
@@ -72,17 +96,30 @@ local function main()
   if #tArgs == 0 then
     print("error: no arguments")
   else
-    if tArgs[1] == "f" then
-      tor.directMove("1f",true)
-      table.remove(tArgs,1)
-    elseif tArgs[1] == "y" then
-      tor.directMove("1y",true)
-      table.remove(tArgs,1)
-    elseif tArgs[1] == "-y" then
-      tor.directMove("-1y",true)
+    local right
+    local udfe = "d"
+    turtle.select(1)
+    local storageAware = hasShulker()
+    if string.sub(tArgs[1],1,1) == "+" then
+      if string.sub(tArgs[1],2,2) == "r" then right = true end
+      udfe = string.sub(tArgs[1],-1,-1)
+      if udfe == "r" then udfe = "d" end
       table.remove(tArgs,1)
     end
-    volume()
+    if udfe == "d" or udfe == "u" or udfe =="f" or udfe == "e" then
+      if tArgs[1] == "f" or tArgs[1] == "y" or tArgs[1] == "-y" then
+        local initialMoves = {
+          f = "1f",
+          y = "1y",
+          ["-y"] = "-1y"
+        }
+        tor.directMove(initialMoves[tArgs[1]],true)
+        table.remove(tArgs,1)
+      end
+      volume(right,udfe)
+    else
+      print("error: empty plus argument")
+    end
   end
 end
 main()
