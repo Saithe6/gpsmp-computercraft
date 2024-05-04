@@ -7,10 +7,10 @@ end
 
 local function userLookup(username)
   local users = {
-    Saithe6 = dropDoor(peripheral.wrap("top"),"top")
+    Saithe6 = function() dropDoor(peripheral.wrap("top"),"top") end
   }
   if users[username] == nil then return end
-  return users[username]
+  users[username]()
 end
 
 local function readChat()
