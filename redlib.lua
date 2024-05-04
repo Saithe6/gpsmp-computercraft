@@ -18,7 +18,6 @@ function redlib.pulse(side,hold,delay,strength,integrator)
   end
 end
 
-
 function redlib.toggle(side)
   if rs.getOutput(side) == false then
     rs.setOutput(side, true)
@@ -26,7 +25,6 @@ function redlib.toggle(side)
     rs.setOutput(side, false)
   end
 end
-
 
 -- this code is thanks to JackMacWindows
 function redlib.forceState(state,...)
