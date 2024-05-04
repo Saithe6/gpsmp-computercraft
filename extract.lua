@@ -9,22 +9,15 @@ local function userLookup(username)
   local users = {
     Saithe6 = dropDoor(peripheral.wrap("top"),"top")
   }
-  if users[username] == nil then return false end
+  if users[username] == nil then return end
   return users[username]
 end
 
 local function readChat()
   local event,username,message,uuid,hidden =  os.pullEvent("chat")
-  if hidden and message == "e" and userLookup(username) then return userLookup(username) end
-  return false
+  if hidden and message == "e" then userLookup(username) end
 end
 
-local function main()
-  while true do
-    local rSide = readChat()
-    if rSide ~= false then
-      redlib.pulse()
-    end
-  end
+while true do
+  readChat()
 end
-main()
