@@ -1,3 +1,4 @@
+--- a library for turtle movement and related complex operation
 tor = {}
 tor.blacklist = {
   mods = {
@@ -11,7 +12,7 @@ tor.blacklist = {
     "minecolonies",
     "mcwfences",
     "domum_ornamentum",
-    "estrogen",
+"estrogen",
     "structurize",
     "mcwwindows",
     "sophisticatedstorage",
@@ -51,6 +52,9 @@ tor.blacklist = {
     "bed"
   }
 }
+---@alias vector {x:integer,y:integer,z:integer}
+---@alias cardinalDirection "north"|"east"|"south"|"west"
+---@alias turtleDirection "forward"|"up"|"down"
 tor.data = {
   home = {
     x = 0,
@@ -61,51 +65,10 @@ tor.data = {
 }
 tor.toolSide = "left"
 
-function tor.move(dist,dir,mine)
-  if mine then
-    for i = 1,dist do
-      print(turtle.getFuelLevel())
-      tor.tryMove(dir)
-    end
-  else
-    for i = 1,dist do
-      if turtle.getFuelLevel() == 0 then print("Out of Fuel") else
-        print(turtle.getFuelLevel())
-        turtle[dir]()
-      end
-    end
-  end
-  return false
-end
-
-function tor.tryMove(dir)
-  print("trying...")
-  if turtle.getFuelLevel() == 0 then print("Out of Fuel")
-  elseif not turtle[dir]() then
-    print("checking path...")
-    if not tor.checkPath(dir) then
-      tor.tryMove(dir)
-    end
-  end
-end
-
-function tor.detect(dir)
-  local isBlock = false
-  local block = {}
-  if dir == "up" then
-    isBlock,block = turtle.inspectUp()
-  elseif dir == "down" then
-    isBlock,block = turtle.inspectDown()
-  else
-    isBlock,block = turtle.inspect()
-  end
-  return block,isBlock
-end
-
-function tor.checkPath(dir)
+local function checkPath(dir)
   local block,isBlock = tor.detect(dir)
   print(isBlock)
-  if isBlock ~= false then
+  if isBlock then
     if not tor.checkBlacklist(block.name) then
       if dir == "up" then
         turtle.digUp(tor.toolSide)
@@ -118,6 +81,62 @@ function tor.checkPath(dir)
     return tor.checkBlacklist(block.name)
   end
   return true
+end
+
+local function tryMove(dir)
+  print("trying...")
+  if turtle.getFuelLevel() == 0 then
+    print("Out of Fuel")
+    return true
+  elseif not turtle[dir]() then
+    print("checking path...")
+    if checkPath(dir) then
+      return true
+    else
+      tryMove(dir)
+    end
+  end
+  return false
+end
+
+---more advanced, direction agnostic turtle basic movemnt function
+---@param dist integer
+---@param dir turtleDirection the direction to move in
+---@param mine? boolean whether or not to mine blocks along the way
+---@return boolean returns false if an obstacle is hit
+function tor.move(dist,dir,mine)
+  if mine then
+    for i = 1,dist do
+      print(turtle.getFuelLevel())
+      if tryMove(dir) then return false end
+    end
+    return true
+  else
+    for i = 1,dist do
+      if turtle.getFuelLevel() == 0 then print("Out of Fuel") else
+        print(turtle.getFuelLevel())
+        if not turtle[dir]() then return false end
+      end
+    end
+    return true
+  end
+end
+
+---a direction agnostic inspect function 
+---@param dir turtleDirection 
+---@return table
+---@return boolean
+function tor.detect(dir)
+  local isBlock = false
+  local block = {}
+  if dir == "up" then
+    isBlock,block = turtle.inspectUp()
+  elseif dir == "down" then
+    isBlock,block = turtle.inspectDown()
+  else
+    isBlock,block = turtle.inspect()
+  end
+  return block,isBlock
 end
 
 local function checkTypes(block)
@@ -146,8 +165,7 @@ end
 
 function tor.checkBlacklist(block) return checkMods(block) or checkTypes(block) end
 
-
-function tor.changeDir(turn)
+local function changeDir(turn)
   local facings = {
     north = {
       right = "east",
@@ -169,66 +187,73 @@ function tor.changeDir(turn)
   tor.data.facing = facings[tor.data.facing][turn]
 end
 
+---a direction agnostic turn function; also updates tor.facing
+---@param dir string|"left"|"right"
 function tor.turn(dir)
   if dir == "left" then
     turtle.turnLeft()
-    tor.changeDir(dir)
+    changeDir(dir)
   elseif dir == "right" then
     turtle.turnRight()
-    tor.changeDir(dir)
+    changeDir(dir)
   end
 end
 
-function tor.track(x,y,z)
-  tor.data.home.x = tor.data.home.x - x
-  tor.data.home.y = tor.data.home.y - y
-  tor.data.home.z = tor.data.home.z - z
-end
-
+---translates an absolute vector to a relative one based on the value of tor.facing
+---@param absVec vector
+---@return vector
 function tor.toRelative(absVec)
   local relVec = {y = absVec.y}
   local facing = tor.data.facing
   if facing == "north" then
-    relVec.f = -absVec.z
-    relVec.l = absVec.x
+    relVec.z = -absVec.z
+    relVec.x = absVec.x
   elseif facing == "east" then
-    relVec.f = absVec.x
-    relVec.l = absVec.z
+    relVec.z = absVec.x
+    relVec.x = absVec.z
   elseif facing == "west" then
-    relVec.f = -absVec.x
-    relVec.l = -absVec.z
+    relVec.z = -absVec.x
+    relVec.x = -absVec.z
   else
-    relVec.f = absVec.z
-    relVec.l = -absVec.x
+    relVec.z = absVec.z
+    relVec.x = -absVec.x
   end
   return relVec
 end
 
+---moves the turtle along a relative vector, first moving up, then forward, then left
+---@param v vector
+---@param mine? boolean whether or not to mine blocks along the way
+---@return boolean returns false if the turtle encounters an obstruction
 function tor.vecMove(v,mine)
   if v.y > 0 then
-    tor.move(v.y,"up",mine)
+    if not tor.move(v.y,"up",mine) then return false end
   elseif v.y < 0 then
-    tor.move(math.abs(v.y),"down",mine)
+    if not tor.move(math.abs(v.y),"down",mine) then return false end
   end
 
-  if v.f > 0 then
-    tor.move(v.f,"forward",mine)
-  elseif v.f < 0 then
+  if v.z > 0 then
+    if not tor.move(v.z,"forward",mine) then return false end
+  elseif v.z < 0 then
     tor.turn("left")
     tor.turn("left")
-    v.l = -v.l
-    tor.move(math.abs(v.f),"forward",mine)
+    v.x = -v.x
+    if not tor.move(math.abs(v.z),"forward",mine) then return false end
   end
 
-  if v.l > 0 then
+  if v.x > 0 then
     tor.turn("left")
-    tor.move(v.l,"forward",mine)
-  elseif v.l < 0 then
+    if not tor.move(v.x,"forward",mine) then return false end
+  elseif v.x < 0 then
     tor.turn("right")
-    tor.move(math.abs(v.l),"forward",mine)
+    if not tor.move(math.abs(v.x),"forward",mine) then return false end
   end
+  return true
 end
 
+---directly moves turtle using instruction
+---@param instruction string composed of an integer with an axis(l for left/right, x for east/west, y for y, f for forward/back, z for south/north) appended to the end
+---@param mine? boolean whether or not to mine blocks along the way
 function tor.directMove(instruction,mine)
   local dir = string.sub(instruction,-1,-1)
   local dist = tonumber(string.sub(instruction,1,-2))
@@ -283,13 +308,17 @@ function tor.directMove(instruction,mine)
   moves[dir]()
 end
 
-function tor.shulker()
+---places the peripheral in the current slot and wraps it
+---@return table
+function tor.placePeripheral()
   if not turtle.place() then
     turtle.dig()
   end
   return peripheral.wrap("front")
 end
 
+---orients the turtle to be facing a certain direction
+---@param goal cardinalDirection
 function tor.orient(goal)
   local instructions = {
     north = {
@@ -320,6 +349,41 @@ function tor.orient(goal)
   else
     tor.turn(operation)
   end
+end
+
+---returns the x, y, and z of gps.locate as a vector
+---@return vector
+function tor.gpsVec()
+  local vec = {}
+  vec.x,vec.y,vec.z = gps.locate()
+  return vec
+end
+
+---uses gps to find the direction the turtle is facing
+---@param goBack? boolean whether or not to return to starting position after sending the second gps ping
+---@return cardinalDirection
+function tor.gpsFacing(goBack)
+  if goBack == nil then goBack = false end
+
+  local pos = {}
+  local pos1 = tor.gpsVec()
+  tor.move(1,"forward",true)
+  local pos2 = tor.gpsVec()
+  local x = pos2.x - pos1.x
+  local z = pos2.z - pos1.z
+
+  local dirsx = {}
+  dirsx[1] = "east"
+  dirsx[-1] = "west"
+  local dirsz = {}
+  dirsz[1] = "south"
+  dirsz[-1] = "north"
+
+  local dir
+  if x == 0 then dir = dirsz[z]
+  elseif z == 0 then dir = dirsx[x] end
+  if goBack then turtle.back() end
+  return dir
 end
 
 return tor
