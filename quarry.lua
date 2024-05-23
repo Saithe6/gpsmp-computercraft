@@ -8,7 +8,7 @@ local function checkSpace(storageAware)
   if turtle.getItemSpace(16) ~= 64 and storageAware and not storageBlind then
     tor.turn("left")
     tor.turn("left")
-    tor.shulker()
+    tor.placePeripheral()
     for i = 2,16 do
       turtle.select(i)
       turtle.drop()
