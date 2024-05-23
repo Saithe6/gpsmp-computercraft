@@ -12,7 +12,7 @@ tor.blacklist = {
     "minecolonies",
     "mcwfences",
     "domum_ornamentum",
-"estrogen",
+    "estrogen",
     "structurize",
     "mcwwindows",
     "sophisticatedstorage",
