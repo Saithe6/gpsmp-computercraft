@@ -1,5 +1,4 @@
 rednet.open("top")
-os.pullEvent = os.pullEventRaw
 local detector = peripheral.wrap("left")
 local rootPass = "root"
 local adminPass = "admin"
