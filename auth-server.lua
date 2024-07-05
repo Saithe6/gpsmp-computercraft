@@ -1,4 +1,5 @@
 rednet.open("top")
+os.pullEvent = os.pullEventRaw
 local detector = peripheral.wrap("left")
 local rootPass = "root"
 local adminPass = "admin"
@@ -36,21 +37,49 @@ local function filteredReceive(authorizedSender)
   return msg
 end
 
+local function log(logfile,users,authLevel,proxId,details)
+  logfile = fs.open("/logs/"..logfile..".txt","a")
+  local timeStamp = textutils.formatTime(os.time("utc"))
+  local userlist = textutils.serialize(users)
+  local n = "\n"
+  local output
+  if details == nil then
+    output =
+      timeStamp..n..
+      proxId.."/"..authLevel..n..
+      userlist..n..n
+  else
+    output =
+      timeStamp..n..
+      proxId.."/"..authLevel..n..
+      userlist..n..
+      details..n..n
+  end
+  logfile.write(output)
+end
+
 local function doorAuth(users,authLevel,proxId)
   local hasAuth = hasAuthUser(users,authLevel)
   local hasOther = hasAuthUser(users,3,true)
+  local logfile = "errbin"
+  local authorized = false
+  local details
   if hasAuth and not hasOther then
-    return true
+    logfile = "authorized"
+    authorized = true
   elseif hasAuth and hasOther then
+    logfile = "password"
     local input = filteredReceive(proxId)
     if authLevel == 0 then
-      return input == rootPass
+      authorized = input == rootPass
     else
-      return input == adminPass or input == rootPass
+      authorized = input == adminPass or input == rootPass
     end
+    details = authorized and "authorized" or "denied"
   elseif not hasAuth then
-    return false
+    logfile = "denied"
   end
+  log(logfile,users,authLevel,proxId,details)
 end
 
 local function main()
