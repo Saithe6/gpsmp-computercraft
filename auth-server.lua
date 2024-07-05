@@ -85,7 +85,7 @@ local function main()
   while true do
     local proxy,proxData = rednet.receive("saithe:authServer-request")
     local users = detector.getPlayersInCoords(proxData.box[1],proxData.box[2])
-    rednet.send(proxy,doorAuth(users,proxData.authLevel),"saithe:authServer-response")
+    rednet.send(proxy,doorAuth(users,proxData.authLevel,proxy),"saithe:authServer-response")
   end
 end
 main()

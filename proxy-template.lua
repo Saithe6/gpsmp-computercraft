@@ -1,4 +1,5 @@
 rednet.open("top")
+os.pullEvent = os.pullEventRaw
 local authServer = 57
 local proxData = {
   authLevel = 1,
@@ -34,9 +35,17 @@ end
 
 local function main()
   local function allow()
+    term.clear()
+    term.setCursorPos(1,1)
+    print("access authorized")
+    sleep(3)
     -- behavior upon successful authentication
   end
   local function disallow()
+    term.clear()
+    term.setCursorPos(1,1)
+    print("access denied")
+    sleep(3)
     -- behavior upon failed authentication
   end
   rednet.send(authServer,proxData,"saithe:authServer-request")
@@ -48,3 +57,4 @@ local function main()
   if verdict then allow() else disallow() end
 end
 main()
+os.shutdown()
