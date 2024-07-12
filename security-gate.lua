@@ -1,5 +1,4 @@
 rednet.open("top")
--- os.pullEvent = os.pullEventRaw
 local monitor = peripheral.find("monitor")
 local speaker = peripheral.find("speaker")
 local rsi = peripheral.find("redstoneIntegrator")
@@ -25,23 +24,17 @@ local function receive()
 end
 
 local function setrs(rside,state)
-  local side1,side2 = "right","left"
-  if mirror then
-    side1 = "left"
-    side2 = "right"
-  end
+  local side1 = "right"
+  if mirror then side1 = "left" end
   local rsides = {
     gate = function()
-      if state == nil then state = not rs.getOutput(side1) end
       rs.setOutput(side1,state)
     end,
     exterior = function()
-      if state == nil then state = not rsi.getOutput("front") end
       rsi.setOutput("front",state)
     end,
     terminal = function()
-      if state == nil then state = not rsi.getOutput(side2) end
-      rsi.setOutput(side2,state)
+      rsi.setOutput(side1,state)
     end
   }
   rsides[rside]()
@@ -55,14 +48,14 @@ local function main()
       authLevel = 1,
       box = {
         {
-          x = 408,
+          x = 407,
           y = 74,
-          z = 853
+          z = 854
         },
         {
-          x = 410,
+          x = 411,
           y = 76,
-          z = 846
+          z = 845
         }
       }
     }
