@@ -207,16 +207,16 @@ function tor.toRelative(absVec)
   local facing = tor.data.facing
   if facing == "north" then
     relVec.z = -absVec.z
-    relVec.x = absVec.x
+    relVec.x = -absVec.x
   elseif facing == "east" then
-    relVec.z = absVec.x
+    relVec.z = -absVec.x
     relVec.x = absVec.z
   elseif facing == "west" then
-    relVec.z = -absVec.x
+    relVec.z = absVec.x
     relVec.x = -absVec.z
   else
     relVec.z = absVec.z
-    relVec.x = -absVec.x
+    relVec.x = absVec.x
   end
   return relVec
 end
