@@ -1,6 +1,6 @@
-current = turtle.getFuelLevel()
+local current = turtle.getFuelLevel()
 print(current)
-max = turtle.getFuelLimit()
+local max = turtle.getFuelLimit()
 print(max)
 turtle.suckUp()
 turtle.refuel()
